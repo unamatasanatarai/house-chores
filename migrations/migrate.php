@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/config.php';
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -10,7 +10,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
 $stmt = $pdo->query("SELECT migration_name FROM migrations");
 $executed = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-$files = glob(__DIR__ . '/../../scripts/*.sql');
+$files = glob(__DIR__ . '/*.sql');
 sort($files);
 
 $count = 0;

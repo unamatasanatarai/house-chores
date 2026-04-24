@@ -3,6 +3,7 @@ DOCKER_COMPOSE = docker-compose
 APP_SERVICE = app
 DB_SERVICE = db
 API_DIR = /var/www/html/api
+MIGRATIONS_DIR = /var/www/migrations
 
 .PHONY: setup destroy up down restart logs migrate status build help shell db-shell test
 
@@ -48,7 +49,7 @@ logs: ## Stream container logs to the terminal
 # --- Application & DB ---
 
 migrate: ## Run the DB migration script inside the api folder
-	$(DOCKER_COMPOSE) exec -T $(APP_SERVICE) php $(API_DIR)/migrate.php
+	$(DOCKER_COMPOSE) exec -T $(APP_SERVICE) php $(MIGRATIONS_DIR)/migrate.php
 
 shell: ## Enter the app container shell (bash)
 	$(DOCKER_COMPOSE) exec $(APP_SERVICE) bash

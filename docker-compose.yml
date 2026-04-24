@@ -5,7 +5,7 @@ services:
       - "8080:80"
     volumes:
       - ./public:/var/www/html
-      - ./scripts:/var/www/scripts
+      - ./migrations:/var/www/migrations
     networks:
       - chores-network
     depends_on:
