@@ -195,7 +195,12 @@ class ApiTest extends TestCase {
             ]
         ];
         $context  = stream_context_create($options);
-        $result = file_get_contents($this->baseUrl . $endpoint, false, $context);
+        $url = $this->baseUrl . $endpoint;
+        if ($method === 'GET') {
+            $separator = strpos($url, '?') === false ? '?' : '&';
+            $url .= $separator . 'limit=1000';
+        }
+        $result = @file_get_contents($url, false, $context);
         return json_decode($result, true);
     }
 }

@@ -55,8 +55,8 @@ db-shell: ## Enter the MySQL monitor
 
 # --- Testing ---
 
-test: ## Run automated PHPUnit tests
-	$(DOCKER_COMPOSE) exec $(APP_SERVICE) vendor/bin/phpunit
+test: ## Run automated PHPUnit tests with pretty output
+	$(DOCKER_COMPOSE) exec $(APP_SERVICE) vendor/bin/phpunit --testdox
 
 # --- Documentation ---
 

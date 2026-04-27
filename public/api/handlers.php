@@ -70,9 +70,13 @@ function handleChoreList($userId) {
         $chores = $stmt->fetchAll();
 
         // Get total for meta
-        $countSql = "SELECT COUNT(*) FROM chores WHERE status != 'archived'";
-        if ($status) $countSql = "SELECT COUNT(*) FROM chores WHERE status = '$status'";
-        $total = $pdo->query($countSql)->fetchColumn();
+        if ($status) {
+            $countStmt = $pdo->prepare("SELECT COUNT(*) FROM chores WHERE status = ?");
+            $countStmt->execute([$status]);
+            $total = $countStmt->fetchColumn();
+        } else {
+            $total = $pdo->query("SELECT COUNT(*) FROM chores WHERE status != 'archived'")->fetchColumn();
+        }
 
         Response::success($chores, [
             'page' => $page,
