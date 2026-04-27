@@ -752,3 +752,36 @@ section h2 {
     color: var(--text-muted);
     margin-top: 2px;
 }
+
+/* --- Input with Icons --- */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: var(--spacing-md);
+    font-size: 1.1rem;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.input-with-icon input {
+    padding-left: calc(var(--spacing-md) * 3) !important;
+}
+
+/* Premium Datepicker Styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}

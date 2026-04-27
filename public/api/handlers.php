@@ -36,7 +36,7 @@ function handleChoreList($userId) {
                 u1.name as creator_name, 
                 u2.name as claimer_name, 
                 u3.name as completer_name,
-                (c.due_date IS NOT NULL AND c.due_date < NOW() AND c.status != 'completed') as is_overdue
+                (c.due_date IS NOT NULL AND DATE(c.due_date) < CURRENT_DATE() AND c.status != 'completed') as is_overdue
                 FROM chores c
                 LEFT JOIN users u1 ON c.created_by = u1.id
                 LEFT JOIN users u2 ON c.claimed_by = u2.id

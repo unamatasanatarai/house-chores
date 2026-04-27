@@ -284,7 +284,12 @@ function showAddChoreModal() {
                 </div>
                 <div class="form-group">
                     <label>When is it due? *</label>
-                    <input type="date" name="due_date" required min="${new Date().toISOString().split('T')[0]}">
+                    <div class="input-with-icon">
+                        <span class="input-icon">📅</span>
+                        <input type="date" name="due_date" required 
+                               value="${new Date().toISOString().split('T')[0]}" 
+                               min="${new Date().toISOString().split('T')[0]}">
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-text cancel">Cancel</button>
