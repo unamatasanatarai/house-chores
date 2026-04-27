@@ -98,7 +98,7 @@ class ApiTest extends TestCase {
     /**
      * @depends testUserCreation
      */
-    public function testUnarchiveClearsClaim($userId) {
+    public function testUnarchiveRestoresState($userId) {
         // 1. Create and claim a chore
         $choreData = ['title' => 'Unarchive Test'];
         $res = $this->post('/chores/add', $choreData, $userId);
@@ -111,11 +111,11 @@ class ApiTest extends TestCase {
         // 3. Unarchive it
         $this->put("/chores/$choreId/unarchive", [], $userId);
 
-        // 4. Verify it's available and has NO claimed_by
+        // 4. Verify it's BACK to 'claimed' and still has $userId
         $response = $this->get('/chores', $userId);
         $chore = $this->findChore($response['data'], $choreId);
-        $this->assertEquals('available', $chore['status']);
-        $this->assertNull($chore['claimed_by'], "claimed_by should be NULL after unarchive");
+        $this->assertEquals('claimed', $chore['status']);
+        $this->assertEquals($userId, $chore['claimed_by']);
     }
 
     /**

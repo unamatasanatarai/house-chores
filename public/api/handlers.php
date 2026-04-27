@@ -166,8 +166,17 @@ function handleChoreAction($uri, $method, $userId) {
                 break;
 
             case 'unarchive':
-                $pdo->prepare("UPDATE chores SET status = 'available', archived_by = NULL, archived_at = NULL, claimed_by = NULL, claimed_at = NULL WHERE id = ?")
-                    ->execute([$choreId]);
+                $pdo->prepare("
+                    UPDATE chores 
+                    SET status = CASE 
+                        WHEN completed_at IS NOT NULL THEN 'completed'
+                        WHEN claimed_at IS NOT NULL THEN 'claimed'
+                        ELSE 'available'
+                    END, 
+                    archived_by = NULL, 
+                    archived_at = NULL 
+                    WHERE id = ?
+                ")->execute([$choreId]);
                 break;
         }
 
