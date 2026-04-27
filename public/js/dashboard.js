@@ -106,7 +106,13 @@ function updateChoreLists() {
         }
         
         if (list.length === 0) {
-            listContainer.innerHTML = `<div class="empty-state">No chores here.</div>`;
+            const emptyMsgs = {
+                'available': '✨ All caught up! The house is clean (for now).',
+                'claimed-me': '☕ No active chores. Time for a break?',
+                'claimed-others': '👥 Everyone is resting or chores are done.',
+                'completed': '🧹 No recent activity to show.'
+            };
+            listContainer.innerHTML = `<div class="empty-state">${emptyMsgs[id] || 'No chores here.'}</div>`;
         } else {
             listContainer.innerHTML = list.map(chore => renderChoreCard(chore)).join('');
         }
@@ -130,7 +136,7 @@ function renderChoreCard(chore) {
                 <button class="action-btn-text unclaim" data-id="${chore.id}">↩️ Unclaim</button>
             `;
         } else {
-            actions = `<button class="action-btn-text take-over" data-id="${chore.id}">🔄 Take Over</button>`;
+            actions = `<button class="action-btn-text take-over" data-id="${chore.id}" data-owner="${chore.claimer_name || 'someone else'}">🔄 Take Over</button>`;
         }
     }
 
@@ -145,6 +151,8 @@ function renderChoreCard(chore) {
                 <div class="chore-meta">
                     ${isOverdue ? '<span class="badge danger">⚠️ Overdue</span>' : ''}
                     ${chore.due_date ? `<span>📅 ${new Date(chore.due_date).toLocaleDateString()}</span>` : ''}
+                    <span class="meta-owner">👤 Created by: ${chore.creator_name || 'Unknown'}</span>
+                    ${chore.status === 'completed' ? `<span class="meta-owner">✅ Done by: ${chore.completer_name || 'Unknown'}</span>` : ''}
                 </div>
             </div>
             <div class="chore-actions">
@@ -159,7 +167,9 @@ import { ui } from './utils.js';
 async function handleAction(id, action) {
     try {
         if (action === 'take-over') {
-            if (!confirm('This chore is claimed by someone else. Take over?')) return;
+            const btn = document.querySelector(`.take-over[data-id="${id}"]`);
+            const owner = btn ? btn.dataset.owner : 'someone else';
+            if (!confirm(`This chore is claimed by ${owner}. Take over?`)) return;
             await api.put(`/chores/${id}/take-over`);
         } else if (action === 'claim') {
             await api.put(`/chores/${id}/claim`);
