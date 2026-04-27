@@ -111,6 +111,10 @@ async function renderDashboardView() {
     await renderDashboard(document.getElementById('dashboard-content'));
 }
 
+// Global Network Listeners
+window.addEventListener('offline', () => ui.showOfflineOverlay());
+window.addEventListener('online', () => ui.hideOfflineOverlay());
+
 function renderError() {
     appContainer.innerHTML = `
         <div class="error-screen">

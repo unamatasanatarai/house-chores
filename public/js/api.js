@@ -25,25 +25,28 @@ export const api = {
         try {
             const response = await fetch(`${API_BASE}${endpoint}`, config);
             
-            // Reconnected successfully
+            // Reconnected successfully if we reached here
             ui.hideOfflineOverlay();
+
+            if (response.status === 401) {
+                localStorage.removeItem('choreloop_user_id');
+                window.dispatchEvent(new CustomEvent('unauthorized'));
+                return;
+            }
 
             const result = await response.json();
 
             if (!response.ok) {
-                // Handle 401 Unauthorized - redirect to identity selection
-                if (response.status === 401) {
-                    localStorage.removeItem('choreloop_user_id');
-                    window.dispatchEvent(new CustomEvent('unauthorized'));
-                }
                 throw result.error || { message: 'An unexpected error occurred' };
             }
 
             return result;
         } catch (error) {
-            if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            // Network Failure (DNS, Timeout, etc)
+            if (error instanceof TypeError || error.name === 'AbortError') {
                 ui.showOfflineOverlay();
             }
+            
             console.error(`API Error [${endpoint}]:`, error);
             throw error;
         }
