@@ -2,66 +2,61 @@
 DOCKER_COMPOSE = docker-compose
 APP_SERVICE = app
 DB_SERVICE = db
-API_DIR = /var/www/html/api
-MIGRATIONS_DIR = /var/www/migrations
 
-.PHONY: setup destroy up down restart logs migrate status build help shell db-shell test
+.PHONY: setup destroy up down restart logs migrate status build help shell db-shell test install
 
 .DEFAULT_GOAL := help
 
 # --- Infrastructure & Lifecycle ---
 
-setup: build up ## Full setup from scratch (build, init composer, migrate)
-	@echo "Waiting for database to initialize (20s)..."
-	@sleep 20
-	$(MAKE) migrate
+setup: build up install migrate ## Full setup from scratch (build, install, migrate)
 	@echo "Setup complete!"
 	@echo "Webapp: http://localhost:8080"
 	@echo "API Root: http://localhost:8080/api/"
 
 destroy: ## Completely wipe containers, networks, volumes, and data
 	$(DOCKER_COMPOSE) down -v --remove-orphans
-	@echo "Removing dangling images..."
-	@docker image prune -f
 	@echo "Environment destroyed."
 
 # --- Docker Commands ---
 
-up: ## Start the environment and run containers in background
+up: ## Start the environment
 	$(DOCKER_COMPOSE) up -d
 
-down: ## Stop and remove containers and networks
+down: ## Stop containers
 	$(DOCKER_COMPOSE) down
 
-build: ## Build or rebuild container images without cache
-	$(DOCKER_COMPOSE) build --no-cache
+build: ## Build container images
+	$(DOCKER_COMPOSE) build
 
-restart: ## Stop and start the environment
+restart: ## Restart containers
 	$(DOCKER_COMPOSE) down
 	$(DOCKER_COMPOSE) up -d
 
-status: ## Check the health and status of running containers
+status: ## Check container status
 	$(DOCKER_COMPOSE) ps
 
-logs: ## Stream container logs to the terminal
+logs: ## Stream container logs
 	$(DOCKER_COMPOSE) logs -f
 
 # --- Application & DB ---
 
-migrate: ## Run the DB migration script inside the api folder
-	$(DOCKER_COMPOSE) exec -T $(APP_SERVICE) php $(MIGRATIONS_DIR)/migrate.php
+install: ## Install PHP dependencies via Composer
+	$(DOCKER_COMPOSE) exec $(APP_SERVICE) composer install
 
-shell: ## Enter the app container shell (bash)
+migrate: ## Run database migrations
+	$(DOCKER_COMPOSE) exec $(APP_SERVICE) php migrations/migrate.php
+
+shell: ## Enter the app container shell
 	$(DOCKER_COMPOSE) exec $(APP_SERVICE) bash
 
-db-shell: ## Enter the MySQL monitor inside the db container
+db-shell: ## Enter the MySQL monitor
 	$(DOCKER_COMPOSE) exec $(DB_SERVICE) mysql -u root -proot_password family_chores
 
 # --- Testing ---
 
-test: ## Run all API test suites (requires running environment)
-	@echo "Running API test suites..."
-	@bash tests/api.sh
+test: ## Run automated PHPUnit tests
+	$(DOCKER_COMPOSE) exec $(APP_SERVICE) vendor/bin/phpunit
 
 # --- Documentation ---
 

@@ -5,7 +5,7 @@ export async function renderDashboard(container) {
     container.innerHTML = `
         <div class="dashboard-header">
             <h1>Household Chores</h1>
-            <button id="add-chore-btn" class="btn-primary">+ Add Chore</button>
+            <button id="add-chore-btn" class="btn-primary">✨ Add Chore</button>
         </div>
         <div class="dashboard-grid">
             <section id="claimed-me">
@@ -55,7 +55,7 @@ function updateChoreLists() {
     
     const sections = {
         'claimed-me': chores.filter(c => c.status === 'claimed' && c.claimed_by === user.id),
-        'available': chores.filter(c => c.status === 'available'),
+        'available': chores.filter(c => c.status === 'available' && !c.claimed_by),
         'claimed-others': chores.filter(c => c.status === 'claimed' && c.claimed_by !== user.id),
         'completed': chores.filter(c => c.status === 'completed')
     };
@@ -75,36 +75,37 @@ function updateChoreLists() {
 function renderChoreCard(chore) {
     const { user } = store.state;
     const isOwner = chore.claimed_by === user.id;
-    const isClaimedByOther = chore.claimed_by && chore.claimed_by !== user.id;
     const isOverdue = chore.is_overdue === "1";
 
     let actions = '';
     if (chore.status === 'available') {
-        actions = `<button class="action-btn claim" data-id="${chore.id}">Claim</button>`;
+        actions = `<button class="action-btn claim" data-id="${chore.id}">✋ Claim</button>`;
     } else if (chore.status === 'claimed') {
         if (isOwner) {
             actions = `
-                <button class="action-btn done" data-id="${chore.id}">Done</button>
-                <button class="action-btn-text unclaim" data-id="${chore.id}">Unclaim</button>
+                <button class="action-btn done" data-id="${chore.id}">✅ Done</button>
+                <button class="action-btn-text unclaim" data-id="${chore.id}">↩️ Unclaim</button>
             `;
         } else {
-            actions = `<button class="action-btn-text take-over" data-id="${chore.id}">Take Over</button>`;
+            actions = `<button class="action-btn-text take-over" data-id="${chore.id}">🔄 Take Over</button>`;
         }
     }
 
     return `
         <div class="chore-card ${isOverdue ? 'overdue' : ''}" data-id="${chore.id}">
             <div class="chore-card-content">
-                <h3>${chore.title}</h3>
+                <div class="chore-card-top">
+                    <h3>${chore.title}</h3>
+                    <button class="icon-btn archive" data-id="${chore.id}" title="Archive">🗑️</button>
+                </div>
                 ${chore.description ? `<p>${chore.description}</p>` : ''}
                 <div class="chore-meta">
-                    ${isOverdue ? '<span class="badge danger">Overdue</span>' : ''}
-                    ${chore.due_date ? `<span>Due: ${new Date(chore.due_date).toLocaleDateString()}</span>` : ''}
+                    ${isOverdue ? '<span class="badge danger">⚠️ Overdue</span>' : ''}
+                    ${chore.due_date ? `<span>📅 ${new Date(chore.due_date).toLocaleDateString()}</span>` : ''}
                 </div>
             </div>
             <div class="chore-actions">
                 ${actions}
-                <button class="icon-btn archive" data-id="${chore.id}" title="Archive">×</button>
             </div>
         </div>
     `;
@@ -116,7 +117,7 @@ async function handleAction(id, action) {
     try {
         if (action === 'take-over') {
             if (!confirm('This chore is claimed by someone else. Take over?')) return;
-            await api.put(`/chores/${id}/claim`);
+            await api.put(`/chores/${id}/take-over`);
         } else if (action === 'claim') {
             await api.put(`/chores/${id}/claim`);
         } else if (action === 'unclaim') {

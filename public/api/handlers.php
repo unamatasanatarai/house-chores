@@ -109,7 +109,7 @@ function handleChoreAdd($userId) {
 }
 
 function handleChoreAction($uri, $method, $userId) {
-    if (!preg_match('/^\/chores\/([a-f\d\-]{36})\/(claim|unclaim|done|archive|unarchive)$/', $uri, $matches)) {
+    if (!preg_match('/^\/chores\/([a-f\d\-]{36})\/(claim|unclaim|done|archive|unarchive|take-over)$/', $uri, $matches)) {
         Response::error('404_NOT_FOUND', 'Endpoint not found', [], 404);
     }
 
@@ -137,6 +137,12 @@ function handleChoreAction($uri, $method, $userId) {
                      Response::error('409_CONFLICT_ALREADY_CLAIMED', 'Chore already claimed (race condition)', [], 409);
                 }
                 break;
+            
+            case 'take-over':
+                // Take over doesn't care if it's already claimed
+                $stmt = $pdo->prepare("UPDATE chores SET status = 'claimed', claimed_by = ?, claimed_at = NOW() WHERE id = ?");
+                $stmt->execute([$userId, $choreId]);
+                break;
 
             case 'unclaim':
                 if ($chore['claimed_by'] !== $userId) {
@@ -160,7 +166,7 @@ function handleChoreAction($uri, $method, $userId) {
                 break;
 
             case 'unarchive':
-                $pdo->prepare("UPDATE chores SET status = 'available', archived_by = NULL, archived_at = NULL WHERE id = ?")
+                $pdo->prepare("UPDATE chores SET status = 'available', archived_by = NULL, archived_at = NULL, claimed_by = NULL, claimed_at = NULL WHERE id = ?")
                     ->execute([$choreId]);
                 break;
         }
@@ -172,6 +178,7 @@ function handleChoreAction($uri, $method, $userId) {
             case 'unclaim': $newStatus = 'available'; break;
             case 'unarchive': $newStatus = 'available'; break;
             case 'archive': $newStatus = 'archived'; break;
+            case 'take-over': $newStatus = 'claimed'; break;
         }
 
         $logAction = $action;
@@ -180,6 +187,7 @@ function handleChoreAction($uri, $method, $userId) {
         if ($action === 'unclaim') $logAction = 'unclaimed';
         if ($action === 'archive') $logAction = 'archived';
         if ($action === 'unarchive') $logAction = 'unarchived';
+        if ($action === 'take-over') $logAction = 'taken_over';
 
         logActivity($choreId, $userId, $logAction);
         Response::success(['id' => $choreId, 'new_status' => $newStatus]);

@@ -1,1 +1,1 @@
-{"version":2,"defects":[],"times":{"ApiTest::testUserCreation":0.19,"ApiTest::testGetChoresRequiresAuth":0.019,"ApiTest::testGetChoresWithAuth":0.032}}
+{"version":2,"defects":[],"times":{"ApiTest::testUserCreation":0.058,"ApiTest::testGetChoresRequiresAuth":0.018,"ApiTest::testGetChoresWithAuth":0.023,"ApiTest::testChoreLifecycle":0.23,"ApiTest::testUnarchiveClearsClaim":0.14,"ApiTest::testClaimConflict":0.163,"ApiTest::testTakeOver":0.149}}
