@@ -82,7 +82,8 @@ make test
 
 | Command | Description |
 |---------|-------------|
-| `make setup` | Full initial setup and migration |
+| `make setup` | Full initial setup, migration, and seeding |
+| `make seed` | Reset and populate the DB with demo data |
 | `make test` | Run automated tests with pretty TestDox output |
 | `make status` | Check container health and healthchecks |
 | `make shell` | Enter the PHP application container |

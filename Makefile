@@ -9,7 +9,7 @@ DB_SERVICE = db
 
 # --- Infrastructure & Lifecycle ---
 
-setup: build up install migrate ## Full setup from scratch (build, install, migrate)
+setup: build up install migrate seed ## Full setup from scratch (build, install, migrate, seed)
 	@echo "Setup complete!"
 	@echo "Webapp: http://localhost:8080"
 	@echo "API Root: http://localhost:8080/api/"
@@ -46,6 +46,9 @@ install: ## Install PHP dependencies via Composer
 
 migrate: ## Run database migrations
 	$(DOCKER_COMPOSE) exec $(APP_SERVICE) php migrations/migrate.php
+
+seed: ## Populate the database with demo users and chores
+	$(DOCKER_COMPOSE) exec $(APP_SERVICE) php migrations/seed.php
 
 shell: ## Enter the app container shell
 	$(DOCKER_COMPOSE) exec $(APP_SERVICE) bash
