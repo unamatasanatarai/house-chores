@@ -204,11 +204,57 @@ function attachCardListeners() {
 }
 
 function showAddChoreModal() {
-    // Basic implementation for now
-    const title = prompt('Chore Title:');
-    if (!title) return;
-    const description = prompt('Description (optional):');
-    const due_date = prompt('Due Date (YYYY-MM-DD, optional):');
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>✨ New Chore</h2>
+            <form id="add-chore-form">
+                <div class="form-group">
+                    <label>What needs to be done?</label>
+                    <input type="text" name="title" placeholder="e.g., Wash the dishes" required>
+                </div>
+                <div class="form-group">
+                    <label>Details (Optional)</label>
+                    <textarea name="description" placeholder="Any special instructions?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>When is it due? *</label>
+                    <input type="date" name="due_date" required min="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-text cancel">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Chore</button>
+                </div>
+            </form>
+        </div>
+    `;
 
-    api.post('/chores/add', { title, description, due_date }).then(loadChores);
+    document.body.appendChild(modal);
+
+    const form = modal.querySelector('form');
+    const cancelBtn = modal.querySelector('.cancel');
+
+    const closeModal = () => {
+        modal.classList.add('fade-out');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    cancelBtn.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            await api.post('/chores/add', data);
+            closeModal();
+            loadChores();
+            ui.snackbar('Chore added successfully! 🚀');
+        } catch (error) {
+            ui.snackbar(error.message || 'Failed to add chore');
+        }
+    };
 }
