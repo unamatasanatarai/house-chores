@@ -4,8 +4,9 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./public:/var/www/html
-      - ./migrations:/var/www/migrations
+      - .:/var/www
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/public
     networks:
       - chores-network
     depends_on:
