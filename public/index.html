@@ -11,13 +11,28 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div id="app">
-        <!-- App content will be injected here -->
-        <div class="loading-screen">
-            <div class="spinner"></div>
-            <p>Initializing ChoreLoop...</p>
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">🔄</div>
+            <div class="logo-text">ChoreLoop</div>
         </div>
-    </div>
+        <nav>
+            <a href="#" class="active"><span class="icon">🏠</span> Home</a>
+            <a href="#"><span class="icon">📋</span> Chores</a>
+            <a href="#"><span class="icon">👨‍👩‍👧</span> Family</a>
+            <a href="#"><span class="icon">🏆</span> Rewards</a>
+            <a href="#"><span class="icon">📊</span> Leaderboard</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div id="app">
+            <div class="loading-screen">
+                <div class="spinner"></div>
+                <p>Initializing ChoreLoop...</p>
+            </div>
+        </div>
+    </main>
 
     <script type="module" src="js/app.js"></script>
 </body>

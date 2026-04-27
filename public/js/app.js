@@ -85,29 +85,30 @@ function selectUser(userId) {
     initApp();
 }
 
-import { renderDashboard } from './dashboard.js';
+import { renderDashboard, stopPolling } from './dashboard.js';
 
-function renderDashboardView() {
+async function renderDashboardView() {
     const { user } = store.state;
     appContainer.innerHTML = `
-        <header>
-            <div class="logo">ChoreLoop</div>
+        <div class="top-bar">
             <div class="user-info">
                 <span>Acting as: <strong>${user.name}</strong></span>
-                <button id="switch-user" class="btn-text">Switch</button>
+                <button id="switch-user" class="btn-text">Switch User</button>
             </div>
-        </header>
-        <main id="dashboard-content">
+        </div>
+        <div id="dashboard-content">
             <div class="spinner"></div>
-        </main>
+        </div>
     `;
 
     document.getElementById('switch-user').onclick = () => {
         localStorage.removeItem('choreloop_user_id');
+        store.setState({ user: null }); // Clear user in store!
+        stopPolling();
         renderIdentitySelection();
     };
 
-    renderDashboard(document.getElementById('dashboard-content'));
+    await renderDashboard(document.getElementById('dashboard-content'));
 }
 
 function renderError() {

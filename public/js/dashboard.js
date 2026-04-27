@@ -1,28 +1,37 @@
 import { api } from './api.js';
 import { store } from './store.js';
 
+let pollingInterval = null;
+
 export async function renderDashboard(container) {
+    const { user } = store.state;
+    if (!user) return;
+
+    // Initial grid setup
     container.innerHTML = `
         <div class="dashboard-header">
-            <h1>Household Chores</h1>
+            <div class="greeting">
+                <h1>Hello, ${user.name}!</h1>
+                <p>Ready to tackle the day? (${new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })})</p>
+            </div>
             <button id="add-chore-btn" class="btn-primary">✨ Add Chore</button>
         </div>
         <div class="dashboard-grid">
-            <section id="claimed-me">
-                <h2>Claimed by Me</h2>
-                <div class="chore-list"></div>
-            </section>
             <section id="available">
-                <h2>Available</h2>
-                <div class="chore-list"></div>
+                <h2>Available Chores</h2>
+                <div class="chore-list"><div class="spinner"></div></div>
+            </section>
+            <section id="claimed-me">
+                <h2>My Chores</h2>
+                <div class="chore-list"><div class="spinner"></div></div>
             </section>
             <section id="claimed-others">
-                <h2>Claimed by Others</h2>
-                <div class="chore-list"></div>
+                <h2>Family Progress</h2>
+                <div class="chore-list"><div class="spinner"></div></div>
             </section>
             <section id="completed">
                 <h2>Recently Completed</h2>
-                <div class="chore-list"></div>
+                <div class="chore-list"><div class="spinner"></div></div>
             </section>
         </div>
     `;
@@ -30,38 +39,72 @@ export async function renderDashboard(container) {
     document.getElementById('add-chore-btn').onclick = showAddChoreModal;
 
     startPolling();
-    loadChores();
+    await loadChores();
 }
 
-let pollingInterval = null;
+export function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
 
 function startPolling() {
-    if (pollingInterval) clearInterval(pollingInterval);
+    stopPolling();
     pollingInterval = setInterval(loadChores, 10000); // Poll every 10 seconds
 }
 
 async function loadChores() {
     try {
+        console.log('Fetching chores...');
         const response = await api.get('/chores');
-        store.setState({ chores: response.data });
-        updateChoreLists();
+        console.log('API Raw Response:', response);
+        
+        if (response.success && Array.isArray(response.data)) {
+            console.log(`Loaded ${response.data.length} chores`);
+            store.setState({ chores: response.data });
+            updateChoreLists();
+        } else {
+            console.error('Invalid chores data format:', response);
+        }
     } catch (error) {
-        console.error('Failed to load chores');
+        console.error('Failed to load chores:', error);
     }
 }
 
 function updateChoreLists() {
     const { user, chores } = store.state;
+    if (!user) {
+        console.warn('updateChoreLists: No user in store');
+        return;
+    }
     
+    console.log('User ID for filtering:', user.id);
+    if (chores.length > 0) {
+        console.log('Sample chore claimed_by:', chores[0].claimed_by);
+    }
+
     const sections = {
-        'claimed-me': chores.filter(c => c.status === 'claimed' && c.claimed_by === user.id),
         'available': chores.filter(c => c.status === 'available' && !c.claimed_by),
-        'claimed-others': chores.filter(c => c.status === 'claimed' && c.claimed_by !== user.id),
+        'claimed-me': chores.filter(c => c.status === 'claimed' && c.claimed_by == user.id),
+        'claimed-others': chores.filter(c => c.status === 'claimed' && c.claimed_by != user.id && c.claimed_by),
         'completed': chores.filter(c => c.status === 'completed')
     };
 
+    console.log('Sections count:', {
+        available: sections.available.length,
+        'claimed-me': sections['claimed-me'].length,
+        'claimed-others': sections['claimed-others'].length,
+        completed: sections.completed.length
+    });
+
     Object.entries(sections).forEach(([id, list]) => {
         const listContainer = document.querySelector(`#${id} .chore-list`);
+        if (!listContainer) {
+            console.error(`List container not found for section: #${id}`);
+            return;
+        }
+        
         if (list.length === 0) {
             listContainer.innerHTML = `<div class="empty-state">No chores here.</div>`;
         } else {
@@ -74,8 +117,8 @@ function updateChoreLists() {
 
 function renderChoreCard(chore) {
     const { user } = store.state;
-    const isOwner = chore.claimed_by === user.id;
-    const isOverdue = chore.is_overdue === "1";
+    const isOwner = chore.claimed_by == user.id;
+    const isOverdue = chore.is_overdue == 1 || chore.is_overdue === "1";
 
     let actions = '';
     if (chore.status === 'available') {
