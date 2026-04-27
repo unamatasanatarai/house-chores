@@ -172,7 +172,29 @@ async function handleAction(id, action) {
         if (action === 'take-over') {
             const btn = document.querySelector(`.take-over[data-id="${id}"]`);
             const owner = btn ? btn.dataset.owner : 'someone else';
-            if (!confirm(`This chore is claimed by ${owner}. Take over?`)) return;
+            
+            const confirmed = await new Promise(resolve => {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content text-center">
+                        <div class="modal-icon warning">🔄</div>
+                        <h2>Take Over?</h2>
+                        <p>This chore is currently claimed by <strong>${owner}</strong>. Are you sure you want to take it over?</p>
+                        <div class="modal-actions centered">
+                            <button class="btn-text cancel">No, Keep as is</button>
+                            <button class="btn-primary confirm-takeover">Yes, Take Over</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                modal.querySelector('.cancel').onclick = () => { modal.remove(); resolve(false); };
+                modal.querySelector('.confirm-takeover').onclick = () => { modal.remove(); resolve(true); };
+                modal.onclick = (e) => { if (e.target === modal) { modal.remove(); resolve(false); } };
+            });
+
+            if (!confirmed) return;
             await api.put(`/chores/${id}/take-over`);
         } else if (action === 'claim') {
             await api.put(`/chores/${id}/claim`);
@@ -180,6 +202,7 @@ async function handleAction(id, action) {
             await api.put(`/chores/${id}/unclaim`);
         } else if (action === 'done') {
             await api.put(`/chores/${id}/done`);
+            ui.confetti();
         } else if (action === 'archive') {
             await api.put(`/chores/${id}/archive`);
             ui.snackbar('Chore archived', {

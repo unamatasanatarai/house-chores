@@ -785,3 +785,40 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     top: 0;
     width: auto;
 }
+
+/* --- Utility Modal Classes --- */
+.text-center { text-align: center; }
+.modal-actions.centered { justify-content: center; }
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+    display: block;
+}
+
+.modal-icon.warning { color: var(--accent-warning); }
+
+.modal-content p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.6;
+}
+
+/* --- Custom Scrollbar --- */
+.log-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.log-list::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+
+.log-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}

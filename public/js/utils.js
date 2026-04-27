@@ -60,5 +60,80 @@ export const ui = {
         if (days < 7) return `${days}d ago`;
         
         return date.toLocaleDateString();
+    },
+
+    confetti() {
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '3000';
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+
+        function createBurst(x, y, angleRange) {
+            for (let i = 0; i < 60; i++) {
+                const angle = angleRange[0] + Math.random() * (angleRange[1] - angleRange[0]);
+                const speed = Math.random() * 50 + 20;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    opacity: 1,
+                    rotation: Math.random() * Math.PI * 2,
+                    vRotation: (Math.random() - 0.5) * 0.4
+                });
+            }
+        }
+
+        // Left corner (aiming up-right: -45 to -75 degrees)
+        createBurst(0, canvas.height, [-Math.PI / 2.5, -Math.PI / 6]);
+        // Right corner (aiming up-left: -105 to -135 degrees)
+        createBurst(canvas.width, canvas.height, [-Math.PI + Math.PI / 6, -Math.PI + Math.PI / 2.5]);
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let finished = true;
+
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 1.2; // Gravity (doubled)
+                p.vx *= 0.98; // Air resistance (slight increase)
+                p.opacity -= 0.016; // Fade speed (doubled)
+                p.rotation += p.vRotation;
+
+                if (p.opacity > 0 && p.y < canvas.height + 100) {
+                    finished = false;
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                }
+            });
+
+            if (!finished) {
+                requestAnimationFrame(animate);
+            } else {
+                canvas.remove();
+            }
+        }
+
+        animate();
     }
 };
