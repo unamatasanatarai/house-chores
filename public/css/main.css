@@ -693,3 +693,62 @@ section h2 {
     from { opacity: 1; transform: scale(1); }
     to { opacity: 0; transform: scale(0.95); }
 }
+
+/* --- Activity Log --- */
+.chore-card-icons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.log-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+
+.log-item {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.log-dot.created { background: var(--accent-secondary); }
+.log-dot.claimed, .log-dot.taken_over { background: var(--accent-warning); }
+.log-dot.completed { background: var(--accent-success); }
+.log-dot.archived { background: var(--text-muted); }
+
+.log-info {
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.log-time {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}

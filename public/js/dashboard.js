@@ -145,7 +145,10 @@ function renderChoreCard(chore) {
             <div class="chore-card-content">
                 <div class="chore-card-top">
                     <h3>${chore.title}</h3>
-                    <button class="icon-btn archive" data-id="${chore.id}" title="Archive">🗑️</button>
+                    <div class="chore-card-icons">
+                        <button class="icon-btn view-log" data-id="${chore.id}" title="History">🕒</button>
+                        <button class="icon-btn archive" data-id="${chore.id}" title="Archive">🗑️</button>
+                    </div>
                 </div>
                 ${chore.description ? `<p>${chore.description}</p>` : ''}
                 <div class="chore-meta">
@@ -197,10 +200,71 @@ function attachCardListeners() {
     document.querySelectorAll('.action-btn, .action-btn-text, .icon-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = btn.dataset.id;
+            if (btn.classList.contains('view-log')) {
+                showChoreLogModal(id);
+                return;
+            }
             const action = [...btn.classList].find(c => ['claim', 'unclaim', 'done', 'archive', 'take-over'].includes(c));
             handleAction(id, action);
         };
     });
+}
+
+async function showChoreLogModal(choreId) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🕒 Activity Log</h2>
+                <button class="btn-text close-modal">Close</button>
+            </div>
+            <div class="log-list">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    const listContainer = modal.querySelector('.log-list');
+    const closeBtn = modal.querySelector('.close-modal');
+
+    closeBtn.onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+    try {
+        const response = await api.get(`/logs?chore_id=${choreId}`);
+        const logs = response.data;
+
+        if (logs.length === 0) {
+            listContainer.innerHTML = '<p class="empty-state">No history recorded yet.</p>';
+        } else {
+            listContainer.innerHTML = logs.map(log => `
+                <div class="log-item">
+                    <div class="log-dot ${log.action}"></div>
+                    <div class="log-info">
+                        <strong>${log.user_name}</strong> ${formatAction(log.action)}
+                        <span class="log-time">${ui.formatTimeAgo(log.created_at)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        listContainer.innerHTML = '<p class="error">Failed to load history.</p>';
+    }
+}
+
+function formatAction(action) {
+    const map = {
+        'created': 'created this task',
+        'claimed': 'claimed this task',
+        'unclaimed': 'returned this task to available',
+        'completed': 'marked this task as done',
+        'archived': 'archived this task',
+        'unarchived': 'restored this task',
+        'taken_over': 'took over this task'
+    };
+    return map[action] || action;
 }
 
 function showAddChoreModal() {
