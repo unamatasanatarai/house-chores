@@ -37,6 +37,7 @@ Every action (Created → Claimed → Done → Taken Over) is automatically logg
 - **Logic:** Vanilla JavaScript (ES6 Modules, No-Framework State Management)
 - **Styling:** Modern Vanilla CSS using Design Tokens and Glassmorphism.
 - **Animations:** High-performance Canvas-based celebrations and micro-interactions.
+- **Keyboard Optimization:** Advanced LIFO modal stack management with `Esc` dismissal and `Enter` confirmation, featuring visible "key-cap" shortcut affordances for high-velocity power users.
 - **Mobile-First:** Fully responsive design with a persistent Bottom-Nav for mobile and a structured Sidebar for tablet/desktop.
 
 ---
