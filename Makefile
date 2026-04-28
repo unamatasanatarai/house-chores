@@ -22,6 +22,8 @@ destroy: ## Completely wipe containers, networks, volumes, and data
 
 up: ## Start the environment
 	$(DOCKER_COMPOSE) up -d
+	@echo "Webapp: http://localhost:8080"
+	@echo "API Root: http://localhost:8080/api/"
 
 down: ## Stop containers
 	$(DOCKER_COMPOSE) down
@@ -29,9 +31,7 @@ down: ## Stop containers
 build: ## Build container images
 	$(DOCKER_COMPOSE) build
 
-restart: ## Restart containers
-	$(DOCKER_COMPOSE) down
-	$(DOCKER_COMPOSE) up -d
+restart: down up ## Restart containers
 
 status: ## Check container status
 	$(DOCKER_COMPOSE) ps

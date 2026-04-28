@@ -1,0 +1,75 @@
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+### General ###
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.iml
+
+### Android / Android Studio ###
+.gradle/
+build/
+*/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.ap_
+*.aab
+
+# Android Studio specific
+.idea/
+*.iml
+.gradle
+out/
+
+### PHP ###
+/vendor/
+composer.lock
+
+# If you want to commit composer.lock, comment the line above
+
+### Composer ###
+composer.phar
+
+### PHPUnit ###
+/phpunit.xml
+/phpunit.xml.dist
+/.phpunit.result.cache
+/phpunit.cache/
+
+### Environment files ###
+.env
+.env.*
+!.env.example
+
+### Cache / Sessions ###
+cache/
+tmp/
+sessions/
+
+### Logs ###
+logs/
+*.log
+
+### Node (if used with Android/PHP tooling) ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+### Misc ###
+coverage/
+*.cache
