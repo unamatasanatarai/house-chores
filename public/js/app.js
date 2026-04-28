@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { store } from './store.js';
+import { ui } from './utils.js';
 
 const appContainer = document.getElementById('app');
 
@@ -114,6 +115,36 @@ async function renderDashboardView() {
 // Global Network Listeners
 window.addEventListener('offline', () => ui.showOfflineOverlay());
 window.addEventListener('online', () => ui.hideOfflineOverlay());
+
+// Global Keyboard Interaction Engine
+window.addEventListener('keydown', (e) => {
+    // 1. Escape Logic (Dismissal)
+    if (e.key === 'Escape') {
+        const active = ui.activeModal;
+        if (active) {
+            active.closeCallback();
+            ui.popModal();
+            // Return focus to the element that triggered the modal
+            if (active.trigger) active.trigger.focus();
+        }
+    }
+
+    // 2. Enter Logic (Confirmation)
+    if (e.key === 'Enter') {
+        // Exclusion: Textareas handle Enter as a new line
+        if (document.activeElement.tagName === 'TEXTAREA') return;
+
+        const active = ui.activeModal;
+        if (active) {
+            // Find the primary action button in the active modal
+            const positiveBtn = active.element.querySelector('.btn-primary, .confirm-takeover');
+            if (positiveBtn && !positiveBtn.disabled) {
+                e.preventDefault(); // Prevent accidental form submissions/refreshes
+                positiveBtn.click();
+            }
+        }
+    }
+});
 
 function renderError() {
     appContainer.innerHTML = `

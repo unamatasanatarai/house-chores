@@ -1,4 +1,22 @@
 export const ui = {
+    modalStack: [],
+
+    pushModal(element, closeCallback) {
+        const trigger = document.activeElement;
+        this.modalStack.push({ element, closeCallback, trigger });
+    },
+
+    popModal() {
+        return this.modalStack.pop();
+    },
+
+    get activeModal() {
+        return this.modalStack[this.modalStack.length - 1];
+    },
+
+    ICON_ENTER: '<span class="key-cap">↵</span>',
+    ICON_ESC: '<span class="key-cap">Esc</span>',
+
     snackbar(message, action = null, duration = 5000) {
         const existing = document.querySelector('.snackbar');
         if (existing) existing.remove();

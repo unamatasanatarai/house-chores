@@ -121,22 +121,22 @@ function updateChoreLists() {
     attachCardListeners();
 }
 
-function renderChoreCard(chore) {
+function renderChoreCard(chore, isModalView = false) {
     const { user } = store.state;
     const isOwner = chore.claimed_by == user.id;
     const isOverdue = chore.is_overdue == 1 || chore.is_overdue === "1";
 
     let actions = '';
     if (chore.status === 'available') {
-        actions = `<button class="action-btn claim" data-id="${chore.id}">✋ Claim</button>`;
+        actions = `<button class="action-btn claim" data-id="${chore.id}">✋ Claim ${isModalView ? ui.ICON_ENTER : ''}</button>`;
     } else if (chore.status === 'claimed') {
         if (isOwner) {
             actions = `
-                <button class="action-btn done" data-id="${chore.id}">✅ Done</button>
-                <button class="action-btn-text unclaim" data-id="${chore.id}">↩️ Unclaim</button>
+                <button class="action-btn done" data-id="${chore.id}">✅ Done ${isModalView ? ui.ICON_ENTER : ''}</button>
+                <button class="action-btn-text unclaim" data-id="${chore.id}">↩️ Unclaim ${isModalView ? ui.ICON_ESC : ''}</button>
             `;
         } else {
-            actions = `<button class="action-btn-text take-over" data-id="${chore.id}" data-owner="${chore.claimer_name || 'someone else'}">🔄 Take Over</button>`;
+            actions = `<button class="action-btn-text take-over" data-id="${chore.id}" data-owner="${chore.claimer_name || 'someone else'}">🔄 Take Over ${isModalView ? ui.ICON_ENTER : ''}</button>`;
         }
     }
 
@@ -182,16 +182,24 @@ async function handleAction(id, action) {
                         <h2>Take Over?</h2>
                         <p>This chore is currently claimed by <strong>${owner}</strong>. Are you sure you want to take it over?</p>
                         <div class="modal-actions centered">
-                            <button class="btn-text cancel">No, Keep as is</button>
-                            <button class="btn-primary confirm-takeover">Yes, Take Over</button>
+                            <button class="btn-text cancel">No, Keep as is ${ui.ICON_ESC}</button>
+                            <button class="btn-primary confirm-takeover">Yes, Take Over ${ui.ICON_ENTER}</button>
                         </div>
                     </div>
                 `;
                 document.body.appendChild(modal);
 
-                modal.querySelector('.cancel').onclick = () => { modal.remove(); resolve(false); };
-                modal.querySelector('.confirm-takeover').onclick = () => { modal.remove(); resolve(true); };
-                modal.onclick = (e) => { if (e.target === modal) { modal.remove(); resolve(false); } };
+                const closeModal = (result) => {
+                    modal.remove();
+                    ui.popModal();
+                    resolve(result);
+                };
+
+                ui.pushModal(modal, () => closeModal(false));
+
+                modal.querySelector('.cancel').onclick = () => closeModal(false);
+                modal.querySelector('.confirm-takeover').onclick = () => closeModal(true);
+                modal.onclick = (e) => { if (e.target === modal) closeModal(false); };
             });
 
             if (!confirmed) return;
@@ -252,8 +260,18 @@ async function showChoreLogModal(choreId) {
     const listContainer = modal.querySelector('.log-list');
     const closeBtn = modal.querySelector('.close-modal');
 
-    closeBtn.onclick = () => modal.remove();
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    // Add icon to close button
+    closeBtn.innerHTML += ` ${ui.ICON_ESC}`;
+
+    const closeModal = () => {
+        modal.remove();
+        ui.popModal();
+    };
+
+    ui.pushModal(modal, closeModal);
+
+    closeBtn.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
     try {
         const response = await api.get(`/logs?chore_id=${choreId}`);
@@ -326,11 +344,19 @@ function showAddChoreModal() {
 
     const form = modal.querySelector('form');
     const cancelBtn = modal.querySelector('.cancel');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // Add icons
+    cancelBtn.innerHTML += ` ${ui.ICON_ESC}`;
+    submitBtn.innerHTML += ` ${ui.ICON_ENTER}`;
 
     const closeModal = () => {
         modal.classList.add('fade-out');
+        ui.popModal();
         setTimeout(() => modal.remove(), 300);
     };
+
+    ui.pushModal(modal, closeModal);
 
     cancelBtn.onclick = closeModal;
     modal.onclick = (e) => { if (e.target === modal) closeModal(); };

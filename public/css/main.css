@@ -798,6 +798,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .modal-icon.warning { color: var(--accent-warning); }
 
+/* --- Keyboard Shortcuts --- */
+.key-cap {
+    font-family: 'Courier New', Courier, monospace;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 8px;
+    color: var(--text-muted);
+    display: inline-block;
+    line-height: 1.4;
+    vertical-align: middle;
+    text-transform: none;
+}
+
+button:hover .key-cap {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.12);
+}
+
 .modal-content p {
     color: var(--text-secondary);
     margin-bottom: var(--spacing-xl);
